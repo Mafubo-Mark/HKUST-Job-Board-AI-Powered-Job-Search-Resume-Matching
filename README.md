@@ -1,20 +1,19 @@
-# HKUST Career Intelligence
+# HKUST Job Board Career Intelligence
 
-A Python workflow that collects filtered opportunities from the HKUST Career Board and uses DeepSeek to assess how each job matches a PDF resume.
+A Python workflow that collects filtered opportunities from the HKUST Job Board and uses DeepSeek to assess how each job matches a PDF resume.
 
 The project connects browser automation, job-data extraction, resume processing, and LLM scoring. It produces local JSON files containing exported jobs, generated prompts, and ranked model responses.
 
 ## Why this project
 
-Reviewing career-board listings involves repeatedly opening job pages, checking application deadlines, and comparing requirements against a resume. This project brings those steps into one workflow while keeping login, declarations, and filter selection under the user's control.
+As an HKUST student searching for internships on the HKUST Job Board, I found it time-consuming to compare the many available positions with my skills, project experience, and research interests. Applying broadly can lead to interviews for roles whose requirements fall outside my background, making preparation less focused.
 
-It is a scripted LLM-assisted pipeline. It does not autonomously plan tasks, submit applications, or modify resumes.
+I built this project to use AI to compare job descriptions against my resume and prioritize relevant opportunities. The goal is to make my internship search more targeted: spend less time screening listings, focus on applications that better match my experience, and prepare for interviews with a clearer understanding of each role’s requirements.
 
 ## Features
 
 - **Manual login with browser automation:** Opens Chrome and waits for the user to complete HKUST login and job-board declarations.
-- **Interactive filtering:** Supports business nature, job nature, employment type, working location, qualification level, employment mode, and language.
-- **Multi-page collection:** Attempts to follow result pages using several pagination selectors and page-change checks.
+- **Filters:** Supports business nature, job nature, employment type, working location, qualification level, employment mode, and language.
 - **Deadline screening:** Skips expired listings, recognizes several date formats and “until filled,” and checks detail pages when deadlines are unclear.
 - **Concurrent detail retrieval:** Fetches candidate job pages within the authenticated browser session, with up to three attempts for failed fetches.
 - **Resume-based prompts:** Extracts selectable PDF text and creates a separate evaluation prompt for each job with a nonempty description.
@@ -49,7 +48,7 @@ The application uses local JSON files. It does not require a database, web backe
 
 ## Setup
 
-You will need Python 3, Google Chrome, access to the HKUST Career Board, a DeepSeek API key, and a PDF resume containing selectable text. The browser and API calls require network access.
+You will need Python, Google Chrome, access to the HKUST Job Board, a DeepSeek API key, and a PDF resume containing selectable text. The browser and API calls require network access.
 
 1. Download or clone this repository and open a terminal in its directory.
 2. Ensure the Python files have their canonical names: `main.py`, `login.py`, `filter_jobs.py`, and `job_exporter.py`. Remove downloaded copy suffixes such as `(2)` or `(8)` so imports resolve correctly.
@@ -123,19 +122,6 @@ recommendation level: <Strongly recommend applying / Apply with targeted resume 
 
 The score is parsed into a temporary `_score` field for sorting. That field is removed before saving, so the saved score remains inside the `deepseek result` text. Replies without a recognized score sort below valid scores.
 
-## Reliability and current limitations
-
-- **Partial progress:** Page exports and successful analysis replies are saved incrementally. Files are overwritten during subsequent runs; there is no automatic resume, version history, or rollback.
-- **Browser dependencies:** Collection depends on the website's HTML structure. Pagination failures can end collection early, so the export is not guaranteed to contain every result.
-- **Empty searches:** The exporter waits for at least one job row and can time out when a search returns no rows. The main workflow handles an empty returned export, but does not remove this exporter timeout.
-- **Deadline interpretation:** Date comparisons use the local computer's date. Unknown deadlines are excluded unless verified as valid from detail text; deadlines already classified as valid on the listing are not rechecked against the detail page.
-- **Detail-fetch failures:** Eligible job summaries can be retained with an error message when details cannot be fetched. This error text is nonempty and may subsequently be passed to the scoring stage.
-- **PDF limitations:** Scanned/image-only resumes require external OCR. The code extracts selectable text and does not implement OCR.
-- **LLM output:** Prompt instructions discourage invented qualifications, but do not guarantee factual or calibrated assessments. The code validates extracted score ranges rather than enforcing the entire two-line response format.
-- **API failures:** Individual analysis errors are printed and processing continues. The explicit three-attempt retry loop applies to job-page fetches, not DeepSeek scoring.
-- **Data extraction:** Job details are flattened page text and may include navigation or footer content. Job URLs are used internally for deduplication but are not saved in the final job schema.
-- **Performance:** Detail fetches are concurrent within each page; LLM requests are sequential. No throughput or scoring-accuracy benchmarks are included.
-
 ## Before publishing your copy
 
 Keep your resume, generated prompts, job exports, model responses, and API credentials out of the public repository. Prompts include the extracted resume text, and the program also prints a resume preview in the terminal. Running scoring sends resume and job content to DeepSeek and may incur API usage charges.
@@ -155,4 +141,4 @@ result.json
 
 Ignore rules do not remove files already tracked by Git. Review staged files before publishing, and remove the original personal filesystem path from `job_exporter.py` if it is still present in your copy.
 
-Use the career board through your own authorized account. This project does not bypass login or declarations and is not affiliated with HKUST or DeepSeek.
+Use the Job board through your own authorized account. This project does not bypass login or declarations and is not affiliated with HKUST or DeepSeek.
