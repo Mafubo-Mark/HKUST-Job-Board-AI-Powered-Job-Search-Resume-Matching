@@ -1,6 +1,6 @@
 """HKUST job search, export, resume prompts, and DeepSeek scoring.
 
-Keep main.py, login.py, filter_jobs.py, job_exporter.py, and resume.pdf
+Keep main.py, job_board.py, and resume.pdf
 in the same folder. Install dependencies with:
     pip install selenium pypdf openai
 Run with:
@@ -19,12 +19,12 @@ All ai_analyze helpers are embedded; a separate ai_analyze.py is unnecessary.
 The exporter output path is aligned with the AI input before export.
 """
 
-from login import (
+from job_board import (
     create_driver,
     login_to_hkust
 )
 
-from filter_jobs import (
+from job_board import (
     # Choose
     choose_business_natures,
     choose_job_natures,
@@ -47,7 +47,7 @@ from filter_jobs import (
     submit_filter
 )
 
-import job_exporter
+import job_board as job_exporter
 
 
 import json
@@ -1154,3 +1154,4 @@ if __name__ == "__main__":
     except Exception as error:
         print(f"\nProgram error: {type(error).__name__}: {error}")
         raise SystemExit(1)
+

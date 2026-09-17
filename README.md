@@ -39,19 +39,31 @@ The application uses local JSON files. It does not require a database, web backe
 | File | Responsibility |
 | --- | --- |
 | `main.py` | Runs login, filtering, export, prompt generation, and scoring. Contains the embedded AI helper functions. |
-| `login.py` | Creates Chrome and waits for the actual job board to appear after manual login. |
-| `filter_jobs.py` | Reads filter options, validates terminal selections, applies filters, and submits searches. |
-| `job_exporter.py` | Collects jobs, checks deadlines, retrieves details, handles pagination, and writes job JSON. |
+| `job_board.py` | Creates Chrome, handles login and filters, checks deadlines, retrieves details, paginates, and exports job JSON. Every function includes an explanatory docstring. |
 | `ai_analyze.py` | Optional standalone entry point for generating prompts and scoring an existing job export. |
 
 `main.py` already includes the AI logic, so it does not import or require `ai_analyze.py`. If both are maintained, changes to shared AI helpers need to be kept consistent.
+
+The former `login.py`, `filter_jobs.py`, and `job_exporter.py` are now combined in `job_board.py`. Use the updated `main.py`; the command remains `python main.py`. Existing helper function names are preserved, but custom scripts should import them from `job_board`.
+
+The combined module is 858 lines, down from 2,593 lines across the three original files. All 39 Python functions have explanatory docstrings. Function signatures, filter limits, deadline rules, retries, pagination, and output fields are preserved.
+
+### Offline checks
+
+After installing Selenium, run the regression tests from the project directory:
+
+```bash
+python -m unittest discover -s tests -v
+```
+
+The 14 tests cover login waits, filter selection, deadline handling, failed-detail retries, page screening, JSON writing, pagination, and the main module's integration. They use mock browser objects; a live HKUST session is still needed to verify the website end to end.
 
 ## Setup
 
 You will need Python, Google Chrome, access to the HKUST Job Board, a DeepSeek API key, and a PDF resume containing selectable text. The browser and API calls require network access.
 
 1. Download or clone this repository and open a terminal in its directory.
-2. Ensure the Python files have their canonical names: `main.py`, `login.py`, `filter_jobs.py`, and `job_exporter.py`. Remove downloaded copy suffixes such as `(2)` or `(8)` so imports resolve correctly.
+2. Ensure the Python files have their canonical names: `main.py` and `job_board.py`. Remove downloaded copy suffixes such as `(2)` or `(8)` so imports resolve correctly.
 3. Create and activate a virtual environment:
 
    ```bash
@@ -93,7 +105,7 @@ python main.py
 5. Enter your DeepSeek API key at the hidden-input prompt. The program sends prompts sequentially and saves ranked responses as processing proceeds.
 6. Press Enter at the final prompt to close Chrome. Browser cleanup also runs if the workflow raises an error.
 
-`main.py` sets the exporter's output path to the `hkust_jobs.json` beside `main.py`, ensuring the AI stage reads the same export. The supplied `job_exporter.py` contains an original machine-specific default path; update its `OUTPUT_FILE` if using the exporter independently.
+`main.py` sets the exporter's output path to the `hkust_jobs.json` beside `main.py`, ensuring the AI stage reads the same export. The supplied `job_board.py` contains an original machine-specific default path; update its `OUTPUT_FILE` if using the exporter independently.
 
 ### Analyze an existing export
 
@@ -139,6 +151,6 @@ hkust_jobs_to_ai.json
 result.json
 ```
 
-Ignore rules do not remove files already tracked by Git. Review staged files before publishing, and remove the original personal filesystem path from `job_exporter.py` if it is still present in your copy.
+Ignore rules do not remove files already tracked by Git. Review staged files before publishing, and remove the original personal filesystem path from `job_board.py` if it is still present in your copy.
 
 Use the Job board through your own authorized account. This project does not bypass login or declarations and is not affiliated with HKUST or DeepSeek.
